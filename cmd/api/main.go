@@ -1,10 +1,13 @@
 package main
 
-import "log"
+import (
+	"SocioGo/internal/env"
+	"log"
+)
 
 func main() {
 	cfg := config{
-		addr: ":8080",
+		addr: env.GetStringEnv("ADDR"),
 	}
 	app := &application{
 		config: cfg,
