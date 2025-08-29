@@ -11,10 +11,10 @@ func main() {
 	cfg := config{
 		addr: env.GetStringEnv("ADDR"),
 		db : dbConfig{
-			addr: env.GetStringEnv("DB_ADDR", "postgres://admin:adminpassword@localhost/socio?sslmode=disable") ,
-			maxOpenConns: env.GetIntEnv("DB_MAX_OPEN_CONNS",30),
-			maxIdleConns: env.GetIntEnv("DB_MAX_IDLE_CONNS",30),
-			maxIdleTime: env.GetStringEnv("DB_MAX_IDLE_TIME","15m"),
+			addr: env.GetStringEnv("DB_ADDR") ,
+			maxOpenConns: env.GetIntEnv("DB_MAX_OPEN_CONNS"),
+			maxIdleConns: env.GetIntEnv("DB_MAX_IDLE_CONNS"),
+			maxIdleTime: env.GetStringEnv("DB_MAX_IDLE_TIME"),
 		},
 	}
 	db, err := db.New(
