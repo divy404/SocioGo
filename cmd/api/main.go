@@ -6,6 +6,7 @@ import (
 	"SocioGo/internal/store"
 	"log"
 )
+const version = "0.0.1"
 
 func main() {
 	cfg := config{
@@ -16,6 +17,7 @@ func main() {
 			maxIdleConns: env.GetIntEnv("DB_MAX_IDLE_CONNS"),
 			maxIdleTime: env.GetStringEnv("DB_MAX_IDLE_TIME"),
 		},
+		env: env.GetStringEnv("ENV"),
 	}
 	db, err := db.New(
 		cfg.db.addr,
