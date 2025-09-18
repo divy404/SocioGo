@@ -9,8 +9,8 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 type CreatePostPayload struct {
-	Title string `json:"title"`
-	Content string `json:"content"`
+	Title string `json:"title" validate:"required,max=100"`
+	Content string `json:"content" validate:"required,max=1000"`
 	Tags []string `json:"tags"`
 }
 func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request) {
@@ -20,6 +20,10 @@ func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 	
+	if err := Validate.Struct(payload); err!= nil {
+		app.badRquestResponse(w,r,err)
+		return
+	}
 	
 	post := &store.Post{
 		Title: payload.Title,
@@ -60,6 +64,12 @@ func (app *application) getPostHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
+	comments, err := app.store.Comments.GetByPostID(ctx, id)
+	if err != nil {
+		app.internalServerError(w,r,err)
+		return
+	} 
+	post.Comments = comments
 	if err := writeJSON(w, http.StatusOK, post); err  != nil {
 		app.internalServerError(w,r,err)
 		return

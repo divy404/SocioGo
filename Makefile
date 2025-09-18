@@ -1,4 +1,5 @@
 include .env
+export $(shell sed 's/=.*//' .env)
 
 MIGRATIONS_PATH = ./cmd/migrate/migrations 
 
@@ -8,8 +9,8 @@ migrate-create:
 
 .PHONY: migrate-up 
 migrate-up:
-	@migrate -path $(MIGRATIONS_PATH) -database $(DB_ADDR) up
+	@migrate -path $(MIGRATIONS_PATH) -database "$(DB_ADDR)" up
 
 .PHONY: migrate-down
 migrate-down:
-	@migrate -path $(MIGRATIONS_PATH) -database $(DB_ADDR) down $(filter-out $@,$(MAKECMDGOALS))
+	@migrate -path $(MIGRATIONS_PATH) -database "$(DB_ADDR)" down $(filter-out $@,$(MAKECMDGOALS))
