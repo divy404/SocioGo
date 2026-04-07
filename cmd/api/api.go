@@ -2,17 +2,18 @@ package main
 
 import (
 	"SocioGo/internal/store"
-	"log"
 	"net/http"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"go.uber.org/zap"
 )
 
 type application struct {
 	config config //server config
 	store  store.Storage
+	logger *zap.SugaredLogger
 }
 type config struct {
 	addr string
@@ -48,7 +49,7 @@ func (app *application) mount() http.Handler {
 				r.Use(app.postsContextMiddleware)
 				r.Get("/", app.getPostHandler)
 				r.Delete("/", app.deletePostHandler)
-				r.Patch("/",app.updatePostHandler)
+				r.Patch("/", app.updatePostHandler)
 				r.Route("/comments", func(r chi.Router) {
 					r.Post("/", app.createCommentHandler)
 				})
@@ -56,15 +57,15 @@ func (app *application) mount() http.Handler {
 			})
 
 		})
-		r.Route("/users", func(r chi.Router){
+		r.Route("/users", func(r chi.Router) {
 			r.Route("/{userID}", func(r chi.Router) {
 				r.Use(app.userContextMiddleware)
 				r.Get("/", app.getUserHandler)
 				r.Post("/follow", app.followUserHandler)
 				r.Post("/unfollow", app.unfollowUserHandler)
 			})
-			r.Group(func(r chi.Router){
-				r.Get("/feed",app.getUserFeedHandler)
+			r.Group(func(r chi.Router) {
+				r.Get("/feed", app.getUserFeedHandler)
 			})
 
 		})
@@ -82,6 +83,7 @@ func (app *application) run(mux http.Handler) error {
 		ReadTimeout:  10 * time.Second,
 		IdleTimeout:  time.Minute,
 	}
-	log.Printf("server has started at %s", app.config.addr)
+	// log.Printf("server has started at %s", app.config.addr)
+	app.logger.Infow("server has started", "addr", app.config.addr,"env", app.config.env)
 	return srv.ListenAndServe()
 }
