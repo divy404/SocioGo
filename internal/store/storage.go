@@ -21,7 +21,8 @@ type Storage struct {
 	}
 	Users interface {
 		GetbyID(context.Context, int64) (*User, error)
-		Create(context.Context, *User) error
+		Create(context.Context, *sql.Tx, *User) error
+		CreateAndInvite(ctx context.Context, user *User, token string, exp time.Duration) error
 	}
 	Comments interface {
 		Create(context.Context, *Comment) error
@@ -41,4 +42,16 @@ type Storage struct {
 			Followers: &FollowerStore{db},
 		}
 	}
-// just adding comment
+
+	// transaction 
+	func withTx(db *sql.DB, ctx context.Context, fn func(*sql.Tx) error) error {
+		tx, err := db.BeginTx(ctx, nil)
+		if err != nil {
+			return err
+		}
+		if err := fn(tx); err != nil {
+			_= tx.Rollback()
+			return err
+		}
+		return tx.Commit()
+	}

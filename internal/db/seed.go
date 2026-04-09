@@ -3,6 +3,7 @@ package db
 import (
 	"SocioGo/internal/store"
 	"context"
+	"database/sql"
 	"fmt"
 	"log"
 	"math/rand"
@@ -18,16 +19,19 @@ var tags = []string{"productivity,life hacks,success","ai,technology,future","mi
 
 var comments = []string{"Great tips! I can already see these improving my productivity.","AI is really fascinating, thanks for breaking it down so clearly.","Minimalism has changed the way I think about my lifestyle.","I’m planning to learn Python next, this was helpful.","These habit tips are easy to implement and practical.","Time management advice is always useful for students like me.","Remote work is the future, this article explains it well.","Machine learning seems less intimidating after reading this.","I’m going to try creating my own morning routine now.","Reading daily is definitely improving my mindset.","Mindfulness exercises are so calming, thanks for sharing.","Clean code practices are essential for every developer.","Adding these destinations to my 2025 travel list!","Motivation tips are exactly what I needed today.","This really opened my eyes to social media’s impact.","I tried the recipes, they were super easy and tasty.","Brand building is key, great insights!","Learning these skills will definitely help my career.","Investing with a small budget is reassuring to start.","Relationship advice here is very practical and relatable.","Consistency really does make a difference, thanks!","Cloud computing seems less confusing after this.","Online learning strategies are very actionable.","I now know how to make my blog posts rank better.","Journaling has improved my focus, thanks for the tip!","These free tools are a lifesaver for students.","Breaking bad habits is tough, but these tips help.","Communication skills are so important, thanks for sharing.","Blockchain will definitely change many industries.","Sleep is so underrated, this is a good reminder.","Freelancing tips are clear and easy to follow.","Procrastination tips are going to save me so much time.","Fitness hacks are simple and effective.","Emotional intelligence is crucial, great advice!","VR in education is exciting, can’t wait to see more.","Stress management techniques are very practical.","These mobile apps are going to be super useful.","Content writing tips are very actionable and helpful.","Growth mindset advice is inspiring!","AI vs human creativity, very interesting discussion.","Book recommendations are excellent, I’ll check them out.","Networking tips are going to help my career a lot.","Money-saving tips are very practical for students.","App-building tips are simple and beginner-friendly.","Gratitude tips are very uplifting, thanks!","Sustainable fashion is something everyone should consider.","Podcast guide is very detailed and helpful.","Tech trends for 2025 are eye-opening!","Work-life balance tips are very actionable and realistic."}
 
-func Seed(store store.Storage) {
+func Seed(store store.Storage, db *sql.DB) {
 	ctx := context.Background()
 
 	users := generateUsers(100)
+	tx,_ := db.BeginTx(ctx, nil)
 	for _, user := range users {
-		if err := store.Users.Create(ctx, user); err != nil {
+		if err := store.Users.Create(ctx,tx, user); err != nil {
+			_= tx.Rollback()
 			log.Println("Error creating user:", err)
 			return
 		}
 	}
+	tx.Commit()
 
 	posts := generatePosts(200, users)
 	for _, post := range posts {
@@ -54,7 +58,6 @@ func generateUsers(num int) []*store.User {
 		users[i] = &store.User{
 			Username: usernames[i%len(usernames)] + fmt.Sprintf("%d", i),
 			Email:    usernames[i%len(usernames)] + fmt.Sprintf("%d", i) + "@example.com",
-			Password: "123123",
 		}
 	}
 	return users

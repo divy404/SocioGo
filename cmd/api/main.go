@@ -4,6 +4,7 @@ import (
 	"SocioGo/internal/db"
 	"SocioGo/internal/env"
 	"SocioGo/internal/store"
+	"time"
 
 	"go.uber.org/zap"
 )
@@ -19,6 +20,9 @@ func main() {
 			maxIdleTime: env.GetStringEnv("DB_MAX_IDLE_TIME"),
 		},
 		env: env.GetStringEnv("ENV"),
+		mail : mailConfig{
+			exp: time.Hour * 24 * 3,
+		},
 	}
 
 	logger := zap.Must(zap.NewProduction()).Sugar()
