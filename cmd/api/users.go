@@ -103,6 +103,24 @@ func (app *application) userContextMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+func (app *application) activateUserHandler(w http.ResponseWriter, r *http.Request) {
+	token := chi.URLParam(r,"token")
+
+	err := app.store.Users.Activate(r.Context(), token) 
+	if err != nil {
+		switch err {
+		case store.ErrNotFound:
+			app.notFoundResponse(w,r,err)
+		default:
+			app.internalServerError(w,r,err)
+		}
+		return 
+	}
+	if err := app.jsonResponse(w, http.StatusNoContent, ""); err != nil {
+		app.internalServerError(w,r,err)
+	}
+}
+
 func getUserFromContext(r *http.Request) *store.User {
 	user, _ := r.Context().Value(userCtx).(*store.User)
 	return user
